@@ -106,142 +106,103 @@ public class MainFrame extends JFrame {
     private void setupMenuOptions() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 15, 15, 15);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        int row = 0;
-        
+
         // Opções comuns para todos os usuários
-        addMenuButton("Consultar Imóveis", "Visualizar catálogo de imóveis", gbc, 0, row++, 
-                     e -> openPropertySearch());
-        
-        addMenuButton("Meus Dados", "Visualizar e editar informações pessoais", gbc, 0, row++, 
-                     e -> openUserProfile());
-        
+        JButton clientesButton = createMenuButton("Gerenciar Clientes", "Cadastrar e gerenciar informações dos clientes");
+        JButton imoveisButton = createMenuButton("Gerenciar Imóveis", "Cadastrar e gerenciar imóveis disponíveis");
+        JButton relatoriosButton = createMenuButton("Relatórios", "Visualizar relatórios de vendas e comissões");
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        menuPanel.add(clientesButton, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 0;
+        menuPanel.add(imoveisButton, gbc);
+
+        gbc.gridx = 2; gbc.gridy = 0;
+        menuPanel.add(relatoriosButton, gbc);
+
         // Opções específicas para administradores
         if (userType.equals("admin")) {
-            addMenuSeparator(gbc, 0, row++);
-            
-            JLabel adminLabel = new JLabel("OPÇÕES DE ADMINISTRADOR");
-            adminLabel.setFont(new Font("Arial", Font.BOLD, 14));
-            adminLabel.setForeground(new Color(70, 130, 180));
-            adminLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            gbc.gridx = 0; gbc.gridy = row++;
-            menuPanel.add(adminLabel, gbc);
-            
-            addMenuButton("Gerenciar Usuários", "Criar e gerenciar contas de usuário", gbc, 0, row++, 
-                         e -> openUserManagement());
-            
-            addMenuButton("Gerenciar Imóveis", "Adicionar e editar imóveis", gbc, 0, row++, 
-                         e -> openPropertyManagement());
-            
-            addMenuButton("Relatórios", "Visualizar relatórios do sistema", gbc, 0, row++, 
-                         e -> openReports());
+            JButton usuariosButton = createMenuButton("Gerenciar Usuários", "Cadastrar e gerenciar usuários do sistema");
+            JButton configButton = createMenuButton("Configurações", "Configurações gerais do sistema");
+
+            gbc.gridx = 0; gbc.gridy = 1;
+            menuPanel.add(usuariosButton, gbc);
+
+            gbc.gridx = 1; gbc.gridy = 1;
+            menuPanel.add(configButton, gbc);
+
+            // Event listener para gerenciar usuários
+            usuariosButton.addActionListener(e -> openUserManagement());
         }
         
-        // Opções específicas para corretores
-        if (userType.equals("user")) {
-            addMenuSeparator(gbc, 0, row++);
-            
-            addMenuButton("Meus Clientes", "Gerenciar clientes atribuídos", gbc, 0, row++, 
-                         e -> openClientManagement());
-            
-            addMenuButton("Minhas Vendas", "Acompanhar vendas e comissões", gbc, 0, row++, 
-                         e -> openSalesTracking());
-        }
+        // Event listeners para botões comuns
+        clientesButton.addActionListener(e -> showNotImplemented("Gerenciamento de Clientes"));
+        imoveisButton.addActionListener(e -> showNotImplemented("Gerenciamento de Imóveis"));
+        relatoriosButton.addActionListener(e -> showNotImplemented("Relatórios"));
     }
     
-    private void addMenuButton(String title, String description, GridBagConstraints gbc, 
-                              int x, int y, ActionListener action) {
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BorderLayout());
-        buttonPanel.setBackground(Color.WHITE);
-        buttonPanel.setBorder(BorderFactory.createRaisedBevelBorder());
-        buttonPanel.setPreferredSize(new Dimension(400, 80));
-        
+    private JButton createMenuButton(String title, String description) {
         JButton button = new JButton();
         button.setLayout(new BorderLayout());
+        button.setPreferredSize(new Dimension(200, 120));
         button.setBackground(Color.WHITE);
-        button.setBorder(null);
-        button.addActionListener(action);
-        
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(70, 130, 180), 2),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
         titleLabel.setForeground(new Color(70, 130, 180));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 20, 5, 20));
-        
-        JLabel descLabel = new JLabel(description);
-        descLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        descLabel.setForeground(Color.GRAY);
-        descLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
-        
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JLabel descLabel = new JLabel("<html><center>" + description + "</center></html>");
+        descLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        descLabel.setForeground(Color.DARK_GRAY);
+        descLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
         button.add(titleLabel, BorderLayout.NORTH);
         button.add(descLabel, BorderLayout.CENTER);
         
-        buttonPanel.add(button);
-        
-        gbc.gridx = x; gbc.gridy = y;
-        menuPanel.add(buttonPanel, gbc);
+        // Efeito hover
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(240, 248, 255));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(Color.WHITE);
+            }
+        });
+
+        return button;
+    }
+
+    private void openUserManagement() {
+        UserManagementFrame userManagementFrame = new UserManagementFrame(this);
+        userManagementFrame.setVisible(true);
     }
     
-    private void addMenuSeparator(GridBagConstraints gbc, int x, int y) {
-        JSeparator separator = new JSeparator();
-        separator.setPreferredSize(new Dimension(400, 1));
-        gbc.gridx = x; gbc.gridy = y;
-        menuPanel.add(separator, gbc);
+    private void showNotImplemented(String feature) {
+        JOptionPane.showMessageDialog(this,
+            "A funcionalidade '" + feature + "' ainda não foi implementada.\n" +
+            "Esta funcionalidade será adicionada em futuras versões.",
+            "Funcionalidade em Desenvolvimento",
+            JOptionPane.INFORMATION_MESSAGE);
     }
     
     private void logout() {
-        int option = JOptionPane.showConfirmDialog(this, 
-                "Tem certeza que deseja sair do sistema?", 
-                "Confirmar Saída", 
-                JOptionPane.YES_NO_OPTION);
-        
-        if (option == JOptionPane.YES_OPTION) {
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "Tem certeza que deseja sair do sistema?",
+            "Confirmar Logout",
+            JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
             dispose();
             SwingUtilities.invokeLater(() -> {
                 new LoginFrame().setVisible(true);
             });
         }
     }
-    
-    // Métodos para abrir diferentes telas (implementações futuras)
-    private void openPropertySearch() {
-        JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento: Consultar Imóveis");
-    }
-    
-    private void openUserProfile() {
-        JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento: Meus Dados");
-    }
-    
-    private void openUserManagement() {
-        SwingUtilities.invokeLater(() -> {
-            UserManagementFrame userMgmtFrame = new UserManagementFrame(this);
-            userMgmtFrame.setVisible(true);
-        });
-    }
-    
-    private void openPropertyManagement() {
-        JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento: Gerenciar Imóveis");
-    }
-    
-    private void openReports() {
-        JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento: Relatórios");
-    }
-    
-    private void openClientManagement() {
-        JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento: Meus Clientes");
-    }
-    
-    private void openSalesTracking() {
-        JOptionPane.showMessageDialog(this, "Funcionalidade em desenvolvimento: Minhas Vendas");
-    }
-    
-    // Getters para acesso aos dados do usuário
-    public UserRecord getCurrentUser() {
-        return currentUser;
-    }
-    
-    public String getUserType() {
-        return userType;
-    }
 }
+

@@ -99,63 +99,51 @@ public class UserManagementFrame extends JFrame {
                 0, 0, new Font("Arial", Font.BOLD, 14), new Color(70, 130, 180)));
         
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.anchor = GridBagConstraints.WEST;
-        
+        gbc.insets = new Insets(8, 8, 8, 8);
+
         // Email
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
         JLabel emailLabel = new JLabel("Email:");
         emailLabel.setFont(new Font("Arial", Font.BOLD, 12));
         formPanel.add(emailLabel, gbc);
         
-        gbc.gridx = 1; gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 1; gbc.gridy = 0; gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(emailField, gbc);
         
-        // Nome de exibição
-        gbc.gridx = 0; gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.NONE;
-        JLabel nameLabel = new JLabel("Nome Completo:");
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        formPanel.add(nameLabel, gbc);
-        
-        gbc.gridx = 1; gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        formPanel.add(displayNameField, gbc);
-        
         // Senha
-        gbc.gridx = 0; gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST; gbc.fill = GridBagConstraints.NONE;
         JLabel passwordLabel = new JLabel("Senha:");
         passwordLabel.setFont(new Font("Arial", Font.BOLD, 12));
         formPanel.add(passwordLabel, gbc);
         
-        gbc.gridx = 1; gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 1; gbc.gridy = 1; gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(passwordField, gbc);
         
-        // Cargo/Função
-        gbc.gridx = 0; gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.NONE;
-        JLabel roleLabel = new JLabel("Cargo:");
+        // Nome de exibição
+        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST; gbc.fill = GridBagConstraints.NONE;
+        JLabel displayNameLabel = new JLabel("Nome:");
+        displayNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        formPanel.add(displayNameLabel, gbc);
+
+        gbc.gridx = 1; gbc.gridy = 2; gbc.fill = GridBagConstraints.HORIZONTAL;
+        formPanel.add(displayNameField, gbc);
+
+        // Tipo de usuário
+        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST; gbc.fill = GridBagConstraints.NONE;
+        JLabel roleLabel = new JLabel("Tipo:");
         roleLabel.setFont(new Font("Arial", Font.BOLD, 12));
         formPanel.add(roleLabel, gbc);
         
-        gbc.gridx = 1; gbc.gridy = 3;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 1; gbc.gridy = 3; gbc.fill = GridBagConstraints.HORIZONTAL;
         formPanel.add(roleComboBox, gbc);
         
-        // Painel dos botões
-        JPanel buttonPanel = new JPanel();
+        // Botões
+        JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.setBackground(new Color(240, 248, 255));
-        buttonPanel.setLayout(new FlowLayout());
         buttonPanel.add(createUserButton);
         buttonPanel.add(cancelButton);
         
-        gbc.gridx = 0; gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(buttonPanel, gbc);
         
         // Painel de log
@@ -164,23 +152,19 @@ public class UserManagementFrame extends JFrame {
         logPanel.setLayout(new BorderLayout());
         logPanel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), 
-                "Log de Atividades", 
+                "Log de Operações",
                 0, 0, new Font("Arial", Font.BOLD, 14), new Color(70, 130, 180)));
         
         JScrollPane scrollPane = new JScrollPane(logArea);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         logPanel.add(scrollPane, BorderLayout.CENTER);
         
-        // Adicionando componentes ao painel principal
+        // Adicionar componentes ao painel principal
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(logPanel, BorderLayout.SOUTH);
         
         add(mainPanel);
-        
-        // Mensagem inicial no log
-        appendLog("Sistema de gerenciamento de usuários iniciado.");
-        appendLog("Preencha os campos e clique em 'Criar Usuário'.");
     }
     
     private void setupEventListeners() {
@@ -197,30 +181,32 @@ public class UserManagementFrame extends JFrame {
                 dispose();
             }
         });
+
+        // Permitir criar usuário com Enter
+        displayNameField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createNewUser();
+            }
+        });
     }
     
     private void createNewUser() {
-        // Validar campos
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword());
         String displayName = displayNameField.getText().trim();
         String role = (String) roleComboBox.getSelectedItem();
         
+        // Validações
         if (email.isEmpty()) {
             showError("Por favor, digite o email.");
             emailField.requestFocus();
             return;
         }
         
-        if (!isValidEmail(email)) {
-            showError("Por favor, digite um email válido.");
-            emailField.requestFocus();
-            return;
-        }
-        
-        if (displayName.isEmpty()) {
-            showError("Por favor, digite o nome completo.");
-            displayNameField.requestFocus();
+        if (password.isEmpty()) {
+            showError("Por favor, digite a senha.");
+            passwordField.requestFocus();
             return;
         }
         
@@ -229,16 +215,22 @@ public class UserManagementFrame extends JFrame {
             passwordField.requestFocus();
             return;
         }
-        
+
+        if (displayName.isEmpty()) {
+            showError("Por favor, digite o nome de exibição.");
+            displayNameField.requestFocus();
+            return;
+        }
+
         if (!firebaseManager.isInitialized()) {
-            showError("Erro de conexão com o Firebase. Tente novamente.");
+            showError("Firebase não está inicializado. Verifique a conexão.");
             return;
         }
         
         // Verificar se o usuário já existe
         if (firebaseManager.userExists(email)) {
-            showError("Já existe um usuário com este email.");
-            appendLog("ERRO: Tentativa de criar usuário duplicado: " + email);
+            showError("Usuário com este email já existe.");
+            emailField.requestFocus();
             return;
         }
         
@@ -246,25 +238,18 @@ public class UserManagementFrame extends JFrame {
         createUserButton.setEnabled(false);
         createUserButton.setText("Criando...");
         
-        appendLog("Iniciando criação de usuário: " + email);
-        
         // Executar criação em thread separada
         SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
             private String errorMessage = "";
-            private UserRecord newUser = null;
-            
+            private UserRecord createdUser = null;
+
             @Override
             protected Boolean doInBackground() throws Exception {
                 try {
-                    // Criar usuário no Firebase
-                    newUser = firebaseManager.createUser(email, password, displayName);
-                    
-                    // TODO: Em um sistema real, você salvaria informações adicionais
-                    // como o cargo no Firestore ou como custom claims
-                    
+                    createdUser = firebaseManager.createUser(email, password, displayName);
                     return true;
                 } catch (FirebaseAuthException e) {
-                    errorMessage = "Erro do Firebase: " + e.getMessage();
+                    errorMessage = "Erro ao criar usuário: " + e.getMessage();
                     return false;
                 } catch (Exception e) {
                     errorMessage = "Erro inesperado: " + e.getMessage();
@@ -280,40 +265,34 @@ public class UserManagementFrame extends JFrame {
                 
                 try {
                     Boolean success = get();
-                    if (success && newUser != null) {
+                    if (success) {
                         // Sucesso
-                        String successMsg = "Usuário criado com sucesso!\n" +
-                                          "UID: " + newUser.getUid() + "\n" +
-                                          "Email: " + newUser.getEmail() + "\n" +
-                                          "Nome: " + newUser.getDisplayName() + "\n" +
-                                          "Cargo: " + role;
-                        
-                        showSuccess(successMsg);
-                        appendLog("SUCESSO: Usuário criado - UID: " + newUser.getUid());
-                        appendLog("  Email: " + newUser.getEmail());
-                        appendLog("  Nome: " + newUser.getDisplayName());
-                        appendLog("  Cargo: " + role);
-                        
-                        // Limpar formulário
+                        logMessage("✓ Usuário criado com sucesso:");
+                        logMessage("  Email: " + createdUser.getEmail());
+                        logMessage("  Nome: " + createdUser.getDisplayName());
+                        logMessage("  Tipo: " + role);
+                        logMessage("  UID: " + createdUser.getUid());
+                        logMessage("  Data/Hora: " + new java.util.Date());
+                        logMessage("─────────────────────────────────────");
+
+                        showSuccess("Usuário criado com sucesso!");
                         clearForm();
-                        
                     } else {
                         // Erro
+                        logMessage("✗ Erro ao criar usuário:");
+                        logMessage("  " + errorMessage);
+                        logMessage("  Data/Hora: " + new java.util.Date());
+                        logMessage("─────────────────────────────────────");
+
                         showError(errorMessage);
-                        appendLog("ERRO: " + errorMessage);
                     }
                 } catch (Exception e) {
                     showError("Erro inesperado: " + e.getMessage());
-                    appendLog("ERRO CRÍTICO: " + e.getMessage());
                 }
             }
         };
         
         worker.execute();
-    }
-    
-    private boolean isValidEmail(String email) {
-        return email.contains("@") && email.contains(".") && email.length() > 5;
     }
     
     private void clearForm() {
@@ -324,12 +303,9 @@ public class UserManagementFrame extends JFrame {
         emailField.requestFocus();
     }
     
-    private void appendLog(String message) {
-        SwingUtilities.invokeLater(() -> {
-            String timestamp = java.time.LocalTime.now().toString().substring(0, 8);
-            logArea.append("[" + timestamp + "] " + message + "\n");
-            logArea.setCaretPosition(logArea.getDocument().getLength());
-        });
+    private void logMessage(String message) {
+        logArea.append(message + "\n");
+        logArea.setCaretPosition(logArea.getDocument().getLength());
     }
     
     private void showError(String message) {

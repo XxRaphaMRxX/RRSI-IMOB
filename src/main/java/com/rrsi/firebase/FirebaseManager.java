@@ -9,7 +9,6 @@ import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.UserRecord.CreateRequest;
 
 import javax.swing.JOptionPane;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -39,7 +38,7 @@ public class FirebaseManager {
         try {
             // Carrega o arquivo de credenciais do classpath
             InputStream serviceAccount = getClass().getClassLoader()
-                    .getResourceAsStream("rrsi-imob-firebase-adminsdk-fbsvc-91b99ff21c.json");
+                    .getResourceAsStream("rrsi-imob-firebase-adminsdk-fbsvc-c0c45e9354.json");
             
             if (serviceAccount == null) {
                 throw new IOException("Arquivo de credenciais do Firebase não encontrado");
@@ -81,7 +80,7 @@ public class FirebaseManager {
      * Obtém um usuário pelo email
      */
     public UserRecord getUserByEmail(String email) throws FirebaseAuthException {
-        if (!initialized) {
+        if (!isInitialized()) {
             throw new IllegalStateException("Firebase não foi inicializado");
         }
         return firebaseAuth.getUserByEmail(email);
@@ -91,7 +90,7 @@ public class FirebaseManager {
      * Cria um novo usuário no Firebase
      */
     public UserRecord createUser(String email, String password, String displayName) throws FirebaseAuthException {
-        if (!initialized) {
+        if (!isInitialized()) {
             throw new IllegalStateException("Firebase não foi inicializado");
         }
         
@@ -105,16 +104,6 @@ public class FirebaseManager {
     }
     
     /**
-     * Cria um token customizado para autenticação
-     */
-    public String createCustomToken(String uid) throws FirebaseAuthException {
-        if (!initialized) {
-            throw new IllegalStateException("Firebase não foi inicializado");
-        }
-        return firebaseAuth.createCustomToken(uid);
-    }
-    
-    /**
      * Verifica se um usuário existe pelo email
      */
     public boolean userExists(String email) {
@@ -124,12 +113,5 @@ public class FirebaseManager {
         } catch (FirebaseAuthException e) {
             return false;
         }
-    }
-    
-    /**
-     * Obtém a instância do FirebaseAuth
-     */
-    public FirebaseAuth getFirebaseAuth() {
-        return firebaseAuth;
     }
 }
